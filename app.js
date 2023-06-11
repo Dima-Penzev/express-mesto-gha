@@ -3,7 +3,6 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const routes = require('./routes/index');
-const { setUserId } = require('./midllewares/setUserId');
 
 const { PORT = 3000 } = process.env;
 
@@ -22,7 +21,13 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(setUserId);
+app.use((req, res, next) => {
+  req.user = {
+    _id: '6484935b5d302fa15effc3c9',
+  };
+
+  next();
+});
 
 app.use(routes);
 
