@@ -1,0 +1,31 @@
+const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const routes = require('./routes/index');
+const { setUserId } = require('./midllewares/setUserId');
+
+const { PORT = 3000 } = process.env;
+
+const app = express();
+
+mongoose.connect('mongodb://0.0.0.0:27017/mestodb', {
+  useNewUrlParser: true,
+}).then(() => {
+  console.log('Database is successfully connected.');
+}).catch((err) => {
+  console.log(err.message);
+});
+
+app.use(cors());
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(setUserId);
+
+app.use(routes);
+
+app.listen(PORT, () => {
+  console.log(`server is running on port ${PORT}`);
+});
