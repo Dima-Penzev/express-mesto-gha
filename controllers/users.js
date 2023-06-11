@@ -17,10 +17,15 @@ const getUserById = (req, res) => {
   const { userId } = req.params;
 
   return User.findById(userId)
-    .then((user) => res.status(200).send({ data: user }))
+    .then((user) => {
+      if (!user) {
+        return res.status(404).send({ message: 'Пользователь по указанному id не найден.' });
+      }
+      return res.status(200).send({ data: user });
+    })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(404).send({ message: `Пользователь по указанному id: ${userId} не найден.` });
+        return res.status(400).send({ message: 'Передан некоректный id пользователя.' });
       }
 
       return res.status(500).send({ message: err.message });
@@ -32,10 +37,15 @@ const updateUserDataById = (req, res) => {
   const { name, about } = req.body;
 
   return User.findByIdAndUpdate(userId, { name, about }, { new: true, runValidators: true })
-    .then((user) => res.status(200).send(user))
+    .then((user) => {
+      if (!user) {
+        return res.status(404).send({ message: 'Пользователь по указанному id не найден.' });
+      }
+      return res.status(200).send({ data: user });
+    })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(404).send({ message: `Пользователь по указанному id: ${userId} не найден.` });
+        return res.status(400).send({ message: 'Передан некоректный id пользователя.' });
       }
 
       if (err.name === 'ValidationError') {
@@ -51,10 +61,15 @@ const updateUserAvatarById = (req, res) => {
   const { avatar } = req.body;
 
   return User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
-    .then((user) => res.status(200).send(user))
+    .then((user) => {
+      if (!user) {
+        return res.status(404).send({ message: 'Пользователь по указанному id не найден.' });
+      }
+      return res.status(200).send({ data: user });
+    })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(404).send({ message: `Пользователь по указанному id: ${userId} не найден.` });
+        return res.status(400).send({ message: 'Передан некоректный id пользователя.' });
       }
 
       if (err.name === 'ValidationError') {
