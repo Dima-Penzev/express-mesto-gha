@@ -1,16 +1,19 @@
+const {
+  HTTP_STATUS_OK, HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_NOT_FOUND, HTTP_STATUS_INTERNAL_SERVER_ERROR,
+} = require('node:http2').constants;
 const User = require('../models/user');
 
 const getUsers = (req, res) => User.find({})
-  .then((users) => res.status(200).send({ data: users }))
-  .catch((err) => res.status(500).send({ message: err.message }));
+  .then((users) => res.status(HTTP_STATUS_OK).send({ data: users }))
+  .catch((err) => res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: err.message }));
 
 const createUser = (req, res) => User.create(req.body)
-  .then((newUser) => res.status(200).send(newUser))
+  .then((newUser) => res.status(HTTP_STATUS_OK).send(newUser))
   .catch((err) => {
-    if (err.name === 'ValidationError') {
-      return res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя.' });
+    if (err.name === 'CastError') {
+      return res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя.' });
     }
-    return res.status(500).send({ message: err.message });
+    return res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: err.message });
   });
 
 const getUserById = (req, res) => {
@@ -19,16 +22,16 @@ const getUserById = (req, res) => {
   return User.findById(userId)
     .then((user) => {
       if (!user) {
-        return res.status(404).send({ message: 'Пользователь по указанному id не найден.' });
+        return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Пользователь по указанному id не найден.' });
       }
-      return res.status(200).send({ data: user });
+      return res.status(HTTP_STATUS_OK).send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Передан некоректный id пользователя.' });
+        return res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Передан некоректный id пользователя.' });
       }
 
-      return res.status(500).send({ message: err.message });
+      return res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: err.message });
     });
 };
 
@@ -39,16 +42,16 @@ const updateUserDataById = (req, res) => {
   return User.findByIdAndUpdate(userId, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        return res.status(404).send({ message: 'Пользователь по указанному id не найден.' });
+        return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Пользователь по указанному id не найден.' });
       }
-      return res.status(200).send({ data: user });
+      return res.status(HTTP_STATUS_OK).send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя.' });
+        return res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя.' });
       }
 
-      return res.status(500).send({ message: err.message });
+      return res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: err.message });
     });
 };
 
@@ -59,16 +62,16 @@ const updateUserAvatarById = (req, res) => {
   return User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        return res.status(404).send({ message: 'Пользователь по указанному id не найден.' });
+        return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Пользователь по указанному id не найден.' });
       }
-      return res.status(200).send({ data: user });
+      return res.status(HTTP_STATUS_OK).send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя.' });
+        return res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя.' });
       }
 
-      return res.status(500).send({ message: err.message });
+      return res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: err.message });
     });
 };
 
