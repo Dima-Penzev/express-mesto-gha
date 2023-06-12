@@ -44,10 +44,6 @@ const updateUserDataById = (req, res) => {
       return res.status(200).send({ data: user });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Передан некоректный id пользователя.' });
-      }
-
       if (err.name === 'ValidationError') {
         return res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя.' });
       }
@@ -68,10 +64,6 @@ const updateUserAvatarById = (req, res) => {
       return res.status(200).send({ data: user });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Передан некоректный id пользователя.' });
-      }
-
       if (err.name === 'ValidationError') {
         return res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя.' });
       }
