@@ -10,7 +10,7 @@ const getUsers = (req, res) => User.find({})
 const createUser = (req, res) => User.create(req.body)
   .then((newUser) => res.status(HTTP_STATUS_OK).send(newUser))
   .catch((err) => {
-    if (err.name === 'CastError') {
+    if (err.name === 'ValidationError') {
       return res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя.' });
     }
     return res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: err.message });
