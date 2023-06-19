@@ -1,23 +1,64 @@
 const {
   HTTP_STATUS_OK, HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_NOT_FOUND, HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_UNAUTHORIZED,
 } = require('node:http2').constants;
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 const getUsers = (req, res) => User.find({})
   .then((users) => res.status(HTTP_STATUS_OK).send({ data: users }))
   .catch((err) => res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: err.message }));
 
-const createUser = (req, res) => User.create(req.body)
-  .then((newUser) => res.status(HTTP_STATUS_OK).send(newUser))
-  .catch((err) => {
-    if (err.name === 'ValidationError') {
-      return res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя.' });
-    }
-    return res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: err.message });
-  });
+const createUser = (req, res) => {
+  const { email, password } = req.body;
+
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      email,
+      password: hash,
+    }))
+    .then((newUser) => res.status(HTTP_STATUS_OK).send(newUser))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя.' });
+      }
+      return res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: err.message });
+    });
+};
+
+const login = (req, res) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'secret-key', { expiresIn: '7d' });
+      return res.status(200).send({ token });
+    })
+    .catch((err) => res.status(HTTP_STATUS_UNAUTHORIZED).send({ message: err.message }));
+};
 
 const getUserById = (req, res) => {
   const { userId } = req.params;
+
+  return User.findById(userId)
+    .then((user) => {
+      if (!user) {
+        return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Пользователь по указанному id не найден.' });
+      }
+      return res.status(HTTP_STATUS_OK).send({ data: user });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Передан некоректный id пользователя.' });
+      }
+
+      return res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: err.message });
+    });
+};
+
+const getUserInfo = (req, res) => {
+  const userId = req.user._id;
 
   return User.findById(userId)
     .then((user) => {
@@ -81,4 +122,6 @@ module.exports = {
   getUserById,
   updateUserDataById,
   updateUserAvatarById,
+  login,
+  getUserInfo,
 };
