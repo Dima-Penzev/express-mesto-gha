@@ -1,5 +1,6 @@
 const {
   HTTP_STATUS_OK, HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_NOT_FOUND, HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_FORBIDDEN,
 } = require('node:http2').constants;
 const Card = require('../models/card');
 
@@ -24,19 +25,28 @@ const createCard = (req, res) => {
 };
 
 const deleteCardById = (req, res) => {
+  const userId = req.user._id;
   const { cardId } = req.params;
 
   return Card.findByIdAndRemove(cardId)
+    .orFail(new Error('NotFound'))
     .then((card) => {
-      if (!card) {
-        return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Карточка по указанному id не найдена.' });
-      }
+      // if (card.owner._id !== userId) {
+      //   return res.status(HTTP_STATUS_FORBIDDEN).send({ message: 'Недостаточно прав для удаления карточки.' });
+      // }
+      console.log(card.owner._id);
+
       return res.status(HTTP_STATUS_OK).send({ data: card });
     })
     .catch((err) => {
+      if (err.message === 'NotFound') {
+        return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Карточка по указанному id не найдена.' });
+      }
+
       if (err.name === 'CastError') {
         return res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Переданы некорректные данные при удалении карточки.' });
       }
+
       return res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: err.message });
     });
 };
