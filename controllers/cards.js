@@ -34,7 +34,7 @@ const deleteCardById = (req, res) => {
       // if (card.owner._id !== userId) {
       //   return res.status(HTTP_STATUS_FORBIDDEN).send({ message: 'Недостаточно прав для удаления карточки.' });
       // }
-      console.log(card.owner._id);
+      console.log(card);
 
       return res.status(HTTP_STATUS_OK).send({ data: card });
     })
