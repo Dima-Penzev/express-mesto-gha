@@ -56,13 +56,13 @@ const LikeCard = (req, res) => Card.findByIdAndUpdate(
   { $addToSet: { likes: req.user._id } },
   { new: true },
 )
-  .then((card) => {
-    if (!card) {
+  .orFail(new Error('NotFound'))
+  .then((card) => res.status(HTTP_STATUS_OK).send({ data: card }))
+  .catch((err) => {
+    if (err.message === 'NotFound') {
       return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Карточка по указанному id не найдена.' });
     }
-    return res.status(HTTP_STATUS_OK).send({ data: card });
-  })
-  .catch((err) => {
+
     if (err.name === 'CastError') {
       return res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки лайка.' });
     }
@@ -75,13 +75,13 @@ const dislikeCard = (req, res) => Card.findByIdAndUpdate(
   { $pull: { likes: req.user._id } },
   { new: true },
 )
-  .then((card) => {
-    if (!card) {
+  .orFail(new Error('NotFound'))
+  .then((card) => res.status(HTTP_STATUS_OK).send({ data: card }))
+  .catch((err) => {
+    if (err.message === 'NotFound') {
       return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Карточка по указанному id не найдена.' });
     }
-    return res.status(HTTP_STATUS_OK).send({ data: card });
-  })
-  .catch((err) => {
+
     if (err.name === 'CastError') {
       return res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Переданы некорректные данные для снятия лайка.' });
     }

@@ -32,7 +32,10 @@ const userSchema = new mongoose.Schema({
   },
   avatar: {
     type: String,
-    required: true,
+    validate: {
+      validator: (v) => /http(s|\b):\/\/.+\.\w+.+/.test(v),
+      message: (props) => `${props.value} - невалидная ссылка!`,
+    },
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
   },
 });
