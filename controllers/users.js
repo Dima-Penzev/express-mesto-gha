@@ -1,10 +1,12 @@
 const { HTTP_STATUS_OK } = require('node:http2').constants;
+const { CastError, ValidationError } = require('mongoose').mongoose.Error;
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const BadRequestError = require('../errors/badRequestError');
 const NotFoundError = require('../errors/notFoundError');
 const UnauthorizedError = require('../errors/unauthorizedError');
+const ConflictError = require('../errors/conflictError');
 
 const getUsers = (req, res, next) => User.find({})
   .then((users) => res.status(HTTP_STATUS_OK).send({ data: users }))
@@ -20,8 +22,12 @@ const createUser = (req, res, next) => {
     }))
     .then((newUser) => res.status(HTTP_STATUS_OK).send(newUser))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        err = new BadRequestError('Переданы некорректные данные при создании пользователя.');
+      if (err.name === 'MongoServerError') {
+        next(new ConflictError('Пользователь с таким email уже существует.'));
+      }
+
+      if (err instanceof ValidationError) {
+        next(new BadRequestError('Переданы некорректные данные при создании пользователя.'));
       }
 
       next(err);
@@ -36,10 +42,8 @@ const login = (req, res, next) => {
       const token = jwt.sign({ _id: user._id }, 'secret-key', { expiresIn: '7d' });
       return res.status(200).send({ token });
     })
-    .catch((err) => {
-      err = new UnauthorizedError('Необходимо ввести корректные логин и пароль.');
-
-      next(err);
+    .catch(() => {
+      next(new UnauthorizedError('Необходимо ввести корректные логин и пароль.'));
     });
 };
 
@@ -54,8 +58,8 @@ const getUserById = (req, res, next) => {
       return res.status(HTTP_STATUS_OK).send({ data: user });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        err = new BadRequestError('Передан некоректный id пользователя.');
+      if (err instanceof CastError) {
+        next(new BadRequestError('Передан некоректный id пользователя.'));
       }
 
       next(err);
@@ -73,8 +77,8 @@ const getUserInfo = (req, res, next) => {
       return res.status(HTTP_STATUS_OK).send({ data: user });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        err = new BadRequestError('Передан некоректный id пользователя.');
+      if (err instanceof CastError) {
+        next(new BadRequestError('Передан некоректный id пользователя.'));
       }
 
       next(err);
@@ -93,8 +97,8 @@ const updateUserDataById = (req, res, next) => {
       return res.status(HTTP_STATUS_OK).send({ data: user });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        err = new BadRequestError('Переданы некорректные данные при создании пользователя.');
+      if (err instanceof ValidationError) {
+        next(new BadRequestError('Переданы некорректные данные при создании пользователя.'));
       }
 
       next(err);
@@ -113,8 +117,8 @@ const updateUserAvatarById = (req, res, next) => {
       return res.status(HTTP_STATUS_OK).send({ data: user });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        err = new BadRequestError('Переданы некорректные данные при создании пользователя.');
+      if (err instanceof ValidationError) {
+        next(new BadRequestError('Переданы некорректные данные при создании пользователя.'));
       }
 
       next(err);
