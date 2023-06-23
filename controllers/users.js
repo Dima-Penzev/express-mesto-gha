@@ -1,4 +1,4 @@
-const { HTTP_STATUS_OK } = require('node:http2').constants;
+const { HTTP_STATUS_OK, HTTP_STATUS_CREATED } = require('node:http2').constants;
 const { CastError, ValidationError } = require('mongoose').mongoose.Error;
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -13,14 +13,19 @@ const getUsers = (req, res, next) => User.find({})
   .catch(next);
 
 const createUser = (req, res, next) => {
-  const { email, password } = req.body;
+  const {
+    email, password, name, about, avatar,
+  } = req.body;
 
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
       email,
       password: hash,
+      name,
+      about,
+      avatar,
     }))
-    .then((newUser) => res.status(HTTP_STATUS_OK).send(newUser))
+    .then((newUser) => res.status(HTTP_STATUS_CREATED).send(newUser))
     .catch((err) => {
       if (err.name === 'MongoServerError') {
         next(new ConflictError('Пользователь с таким email уже существует.'));
