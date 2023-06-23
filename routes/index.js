@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { celebrate, Joi } = require('celebrate');
+const { celebrate } = require('celebrate');
 const usersRoutes = require('./users');
 const cardsRoutes = require('./cards');
 const { handleUnexistedPath } = require('../utils/handleUnexistedPath');
