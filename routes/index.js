@@ -1,15 +1,24 @@
 const router = require('express').Router();
-const { celebrate } = require('celebrate');
+const { celebrate, Joi } = require('celebrate');
 const usersRoutes = require('./users');
 const cardsRoutes = require('./cards');
 const { handleUnexistedPath } = require('../utils/handleUnexistedPath');
 const { createUser, login } = require('../controllers/users');
 const auth = require('../middlewares/auth');
-const joiUserSchema = require('../validateSchemas/validateUser');
 
-router.post('/signup', celebrate(joiUserSchema), createUser);
+router.post('/signup', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().email().required(),
+    password: Joi.string().min(8).required(),
+  }),
+}), createUser);
 
-router.post('/signin', celebrate(joiUserSchema), login);
+router.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().email().required(),
+    password: Joi.string().min(8).required(),
+  }),
+}), login);
 
 router.use('/users', auth, usersRoutes);
 
