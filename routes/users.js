@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { celebrate, Joi } = require('celebrate');
+const { celebrate } = require('celebrate');
 const {
   getUsers,
   getUserById,
@@ -7,28 +7,18 @@ const {
   updateUserAvatarById,
   getUserInfo,
 } = require('../controllers/users');
+const joiUserIdSchema = require('../validateSchemas/validateUserId');
+const joiUserDataSchema = require('../validateSchemas/validateUserData');
+const joiUserAvatarSchema = require('../validateSchemas/validateUserAvatar');
 
 router.get('/', getUsers);
 
 router.get('/me', getUserInfo);
 
-router.get('/:userId', celebrate({
-  params: Joi.object().keys({
-    userId: Joi.string().alphanum().length(24),
-  }).unknown(true),
-}), getUserById);
+router.get('/:userId', celebrate(joiUserIdSchema), getUserById);
 
-router.patch('/me', celebrate({
-  body: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
-    about: Joi.string().min(2).max(30),
-  }),
-}), updateUserDataById);
+router.patch('/me', celebrate(joiUserDataSchema), updateUserDataById);
 
-router.patch('/me/avatar', celebrate({
-  body: Joi.object().keys({
-    avatar: Joi.string().pattern(/http(s|\b):\/\/.+\.\w+.+/),
-  }),
-}), updateUserAvatarById);
+router.patch('/me/avatar', celebrate(joiUserAvatarSchema), updateUserAvatarById);
 
 module.exports = router;
