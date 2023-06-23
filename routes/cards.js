@@ -1,11 +1,13 @@
 const router = require('express').Router();
+const { celebrate } = require('celebrate');
 const {
   getCards, createCard, deleteCardById, LikeCard, dislikeCard,
 } = require('../controllers/cards');
+const joiCardSchema = require('../validateSchemas/validateCard');
 
 router.get('/', getCards);
 
-router.post('/', createCard);
+router.post('/', celebrate(joiCardSchema), createCard);
 
 router.delete('/:cardId', deleteCardById);
 
