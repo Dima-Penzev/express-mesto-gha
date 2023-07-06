@@ -2,7 +2,7 @@ const { Joi } = require('celebrate');
 
 const joiUserAvatarSchema = {
   body: Joi.object().keys({
-    avatar: Joi.string().pattern(/http(s|\b):\/\/.+\.\w+.+/),
+    avatar: Joi.string().pattern(/http(s|\b):\/\/.+\.\w+.+/).required(),
   }),
 };
 

@@ -1,6 +1,5 @@
-const { HTTP_STATUS_NOT_FOUND } = require('node:http2').constants;
+const NotFoundError = require('../errors/notFoundError');
 
 module.exports.handleUnexistedPath = (req, res, next) => {
-  res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Нет страницы по указанному пути.' });
-  next();
+  next(new NotFoundError('Нет страницы по указанному пути.'));
 };

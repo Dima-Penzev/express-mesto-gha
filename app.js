@@ -26,7 +26,6 @@ app.use(routes);
 app.use(errors());
 
 app.use((err, req, res, next) => {
-  console.log(err);
   const { statusCode = HTTP_STATUS_INTERNAL_SERVER_ERROR, message } = err;
 
   res

@@ -6,8 +6,9 @@ const { handleUnexistedPath } = require('../utils/handleUnexistedPath');
 const { createUser, login } = require('../controllers/users');
 const auth = require('../middlewares/auth');
 const joiUserSchema = require('../validateSchemas/validateUser');
+const joiInitialDataSchema = require('../validateSchemas/validateInitialData');
 
-router.post('/signup', celebrate(joiUserSchema), createUser);
+router.post('/signup', celebrate(joiInitialDataSchema), createUser);
 
 router.post('/signin', celebrate(joiUserSchema), login);
 
